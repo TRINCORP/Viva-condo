@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { X, Loader2 } from "lucide-react";
+import Button from "./ui/Button";
+import Input from "./ui/Input";
 
 interface Props {
   open: boolean;
@@ -14,6 +17,9 @@ interface Props {
   }) => Promise<void> | void;
 }
 
+const UFOptions = ["AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"];
+const CondominiumTypes = ["Residencial", "Comercial", "Misto", "Industrial"];
+
 export default function CreateCondominioModal({ open, onClose, onSave }: Props) {
   const [nome, setNome] = useState("");
   const [endereco, setEndereco] = useState("");
@@ -21,11 +27,28 @@ export default function CreateCondominioModal({ open, onClose, onSave }: Props) 
   const [uf, setUf] = useState("");
   const [tipo, setTipo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   if (!open) return null;
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!nome.trim()) newErrors.nome = "Nome do condomínio é obrigatório";
+    if (!endereco.trim()) newErrors.endereco = "Endereço é obrigatório";
+    if (!cidade.trim()) newErrors.cidade = "Cidade é obrigatória";
+    if (!uf) newErrors.uf = "UF é obrigatório";
+    if (!tipo) newErrors.tipo = "Tipo é obrigatório";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) return;
+
     setLoading(true);
 
     try {
@@ -37,88 +60,188 @@ export default function CreateCondominioModal({ open, onClose, onSave }: Props) 
         tipo_condominio: tipo,
       });
 
-      // se deu certo, limpa o form e fecha
       setNome("");
       setEndereco("");
       setCidade("");
       setUf("");
       setTipo("");
+      setErrors({});
       onClose();
-    } catch {
-      // o pai já mostra toast de erro, então só não fecha
+    } catch (error) {
+      // Error handling is done by parent
     } finally {
       setLoading(false);
     }
   };
 
+  const handleClose = () => {
+    if (!loading) {
+      onClose();
+      setNome("");
+      setEndereco("");
+      setCidade("");
+      setUf("");
+      setTipo("");
+      setErrors({});
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-40">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Criar Condomínio</h2>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-condominio-title"
+      aria-busy={loading || undefined}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !loading) handleClose();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && !loading) handleClose();
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40" />
 
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="text"
-            placeholder="Nome"
-            className="w-full px-3 py-2 border rounded"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-          />
+      <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h2 id="create-condominio-title" className="text-xl font-semibold text-gray-900">
+            Criar Novo Condomínio
+          </h2>
+          <button
+            onClick={handleClose}
+            disabled={loading}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
 
-          <input
-            type="text"
-            placeholder="Endereço"
-            className="w-full px-3 py-2 border rounded"
-            value={endereco}
-            onChange={(e) => setEndereco(e.target.value)}
-            required
-          />
+        {/* Body */}
+        <form onSubmit={handleSubmit} className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Nome */}
+            <div className="sm:col-span-2">
+              <Input
+                label="Nome do Condomínio"
+                placeholder="Ex: Residencial Jardim das Flores"
+                value={nome}
+                onChange={(e) => {
+                  setNome(e.target.value);
+                  if (errors.nome) setErrors({ ...errors, nome: "" });
+                }}
+                error={errors.nome}
+                disabled={loading}
+              />
+            </div>
 
-          <input
-            type="text"
-            placeholder="Cidade"
-            className="w-full px-3 py-2 border rounded"
-            value={cidade}
-            onChange={(e) => setCidade(e.target.value)}
-            required
-          />
+            {/* Endereço */}
+            <div className="sm:col-span-2">
+              <Input
+                label="Endereço"
+                placeholder="Ex: Rua Primavera 150"
+                value={endereco}
+                onChange={(e) => {
+                  setEndereco(e.target.value);
+                  if (errors.endereco) setErrors({ ...errors, endereco: "" });
+                }}
+                error={errors.endereco}
+                disabled={loading}
+              />
+            </div>
 
-          <input
-            type="text"
-            placeholder="UF"
-            className="w-full px-3 py-2 border rounded"
-            maxLength={2}
-            value={uf}
-            onChange={(e) => setUf(e.target.value.toUpperCase())}
-            required
-          />
+            {/* Cidade */}
+            <div>
+              <Input
+                label="Cidade"
+                placeholder="Ex: Campinas"
+                value={cidade}
+                onChange={(e) => {
+                  setCidade(e.target.value);
+                  if (errors.cidade) setErrors({ ...errors, cidade: "" });
+                }}
+                error={errors.cidade}
+                disabled={loading}
+              />
+            </div>
 
-          <input
-            type="text"
-            placeholder="Tipo (Vertical, Horizontal...)"
-            className="w-full px-3 py-2 border rounded"
-            value={tipo}
-            onChange={(e) => setTipo(e.target.value)}
-            required
-          />
+            {/* UF */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Estado (UF)
+              </label>
+              <select
+                value={uf}
+                onChange={(e) => {
+                  setUf(e.target.value);
+                  if (errors.uf) setErrors({ ...errors, uf: "" });
+                }}
+                disabled={loading}
+                className={`
+                  w-full px-4 py-2 rounded-lg border
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed
+                  ${errors.uf ? "border-red-500 focus:ring-red-500" : "border-gray-300"}
+                `}
+              >
+                <option value="">Selecione um estado</option>
+                {UFOptions.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
+              {errors.uf && <p className="text-sm text-red-600 mt-1">{errors.uf}</p>}
+            </div>
 
-          <div className="flex justify-end gap-2 mt-4">
-            <button
+            {/* Tipo */}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tipo de Condomínio
+              </label>
+              <select
+                value={tipo}
+                onChange={(e) => {
+                  setTipo(e.target.value);
+                  if (errors.tipo) setErrors({ ...errors, tipo: "" });
+                }}
+                disabled={loading}
+                className={`
+                  w-full px-4 py-2 rounded-lg border
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed
+                  ${errors.tipo ? "border-red-500 focus:ring-red-500" : "border-gray-300"}
+                `}
+              >
+                <option value="">Selecione um tipo</option>
+                {CondominiumTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              {errors.tipo && <p className="text-sm text-red-600 mt-1">{errors.tipo}</p>}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-gray-200">
+            <Button
               type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded border border-gray-300"
+              onClick={handleClose}
+              disabled={loading}
+              variant="secondary"
             >
               Cancelar
-            </button>
-
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded disabled:opacity-70 disabled:cursor-not-allowed"
+              isLoading={loading}
+              variant="success"
             >
-              {loading ? "Criando..." : "Salvar"}
-            </button>
+              Criar Condomínio
+            </Button>
           </div>
         </form>
       </div>

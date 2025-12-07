@@ -140,7 +140,7 @@ export default function ListaCondominios() {
   }
 
   return (
-    <div className="pt-20 lg:pt-0">
+    <div>
       <PageHeader
         title="Condomínios"
         description="Gerencie todos os condomínios registrados no sistema"

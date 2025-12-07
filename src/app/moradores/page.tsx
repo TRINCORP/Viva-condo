@@ -8,7 +8,7 @@ import { Home } from "lucide-react";
 
 export default function ListaMoradores() {
   return (
-    <div className="pt-20 lg:pt-0">
+    <div>
       <PageHeader
         title="Moradores"
         description="Gerencie todos os moradores dos condomínios"

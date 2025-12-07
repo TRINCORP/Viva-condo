@@ -8,7 +8,7 @@ import { Users } from "lucide-react";
 
 export default function ListaUsuarios() {
   return (
-    <div className="pt-20 lg:pt-0">
+    <div>
       <PageHeader
         title="Usuários"
         description="Gerencie todos os usuários do sistema"

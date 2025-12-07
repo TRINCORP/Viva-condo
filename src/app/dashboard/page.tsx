@@ -66,15 +66,11 @@ export default function Dashboard() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="pt-20 lg:pt-0">
-        <LoadingSpinner message="Carregando dashboard..." />
-      </div>
-    );
+    return <LoadingSpinner message="Carregando dashboard..." />;
   }
 
   return (
-    <div className="pt-20 lg:pt-0">
+    <div>
       <PageHeader
         title="Dashboard"
         description="Visão geral do sistema de gestão condominial"

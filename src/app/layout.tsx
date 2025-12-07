@@ -19,7 +19,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "VivaCondo - Gestão Condominial",
   description: "Aplicação moderna de gestão de condomínios com interface intuitiva e segura",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
 };
 
 export default async function RootLayout({
@@ -27,7 +26,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();

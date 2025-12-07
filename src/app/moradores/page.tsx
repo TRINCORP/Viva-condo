@@ -1,33 +1,34 @@
 "use client";
 
-export default function ListaMoradores() {
-    return (
-        <div id="p-6 max-w-full">
-            <div className="mb-4 flex items-center justify-between gap-4">
-                <h1 className="text-x1 font-semibold">Moradores</h1>
-            </div>
+import PageHeader from "@/components/ui/PageHeader";
+import Button from "@/components/ui/Button";
+import { Plus } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
+import { Home } from "lucide-react";
 
-            <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="px-4 pt-3 text-left text-xs font-medium text-gray-500 tracking-wider w-12">#</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Nome</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Contato</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Condomínio</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Unidade</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 tracking-wider">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
-                        <tr>
-                            <td className="px-4 py-3 text-em text-gray-700" colSpan={6}>
-                                Nenhum morador encontrado.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+export default function ListaMoradores() {
+  return (
+    <div className="pt-20 lg:pt-0">
+      <PageHeader
+        title="Moradores"
+        description="Gerencie todos os moradores dos condomínios"
+        action={
+          <Button icon={<Plus className="w-5 h-5" />}>
+            Novo Morador
+          </Button>
+        }
+      />
+
+      <EmptyState
+        icon={<Home className="w-16 h-16 text-gray-300" />}
+        title="Nenhum morador cadastrado"
+        description="Cadastre condomínios primeiro e depois adicione moradores às unidades."
+        action={
+          <Button icon={<Plus className="w-5 h-5" />}>
+            Adicionar Primeiro Morador
+          </Button>
+        }
+      />
+    </div>
+  );
 }

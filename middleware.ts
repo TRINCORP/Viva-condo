@@ -1,63 +1,71 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+// Define protected routes and public routes
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/condominios",
+  "/usuarios",
+  "/moradores",
+  "/configuracoes",
+];
+
+const PUBLIC_ROUTES = ["/"];
+const AUTH_ROUTE = "/";
 
 export async function middleware(req: NextRequest) {
-  console.log("🔥 Middleware executado em:", req.nextUrl.pathname);
+  const pathname = req.nextUrl.pathname;
 
+  // Create Supabase client
   let res = NextResponse.next();
-
-  // cria o client do Supabase no middleware
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll: () => {
-          console.log("📍 Cookies lidos:", req.cookies.getAll());
-          return req.cookies.getAll();
-        },
+        getAll: () => req.cookies.getAll(),
         setAll: (cookiesToSet) => {
-          console.log("📍 Cookies a serem setados:", cookiesToSet);
-          // atualiza cookies no request
-          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
-          // recria resposta com novos cookies
-          res = NextResponse.next();
-          cookiesToSet.forEach(({ name, value, options }) =>
-            res.cookies.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            res.cookies.set(name, value, options);
+          });
         },
       },
     }
   );
 
-  console.log("🔎 Checando usuário autenticado...");
-  const { data: { user } } = await supabase.auth.getUser();
+  // Get authenticated user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  console.log("🔵 Usuário no middleware:", user);
-  console.log("🔵 Path acessado:", req.nextUrl.pathname);
+  // Check if route is protected
+  const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
 
-  // se não logado, redireciona para /
-  if (!user) {
-    console.log("🚫 Usuário não autenticado, redirecionando...");
-    const url = new URL("/", req.url);
-    url.searchParams.set("from", req.nextUrl.pathname);
-    return NextResponse.redirect(url);
+  // If not authenticated and trying to access protected route
+  if (isProtectedRoute && !user) {
+    const loginUrl = new URL("/", req.url);
+    loginUrl.searchParams.set("from", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  console.log("✅ Usuário autenticado, acesso liberado!");
+  // If authenticated and trying to access login page, redirect to dashboard
+  if (pathname === "/" && user) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   return res;
 }
 
-// rotas protegidas
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/condominios/:path*",
-    "/usuarios/:path*",
-    "/moradores/:path*",
-    "/configuracoes/:path*"
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
-
-// documentação: https://supabase.com/docs/guides/auth/server-side/creating-a-client?queryGroups=environment&environment=middleware

@@ -1,3 +1,5 @@
+// utils/supabase/server.ts
+
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
@@ -6,13 +8,18 @@ export function createClient() {
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
     {
       cookies: {
-        async get(name: string) {
-          return (await cookieStore).get(name)?.value;
+        get(name: string) {
+          const cookie = cookieStore.get(name);
+          return cookie?.value ?? null; 
         },
-      },
+
+        // ↓ ignorados no Server Component (mas exigidos pelo Supabase SSR)
+        set() {},
+        remove() {},
+      }
     }
   );
 }

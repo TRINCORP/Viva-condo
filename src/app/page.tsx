@@ -20,7 +20,7 @@ export default function LoginPage() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        router.replace("/condominios");
+        router.replace("/dashboard");
         return;
       }
       setCheckingSession(false);
@@ -47,7 +47,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace("/condominios");
+      router.replace("/dashboard");
       router.refresh();
     } catch {
       setErrorMsg("Erro inesperado. Tente novamente.");

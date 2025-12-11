@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Viva Condo",
-  description: "Aplicação de gestão condominial",
+  title: "VivaCondo - Gestão Condominial",
+  description: "Aplicação moderna de gestão de condomínios com interface intuitiva e segura",
 };
 
 export default async function RootLayout({
@@ -26,28 +26,48 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const showMenu = Boolean(session);
+  const userLogged = Boolean(session);
 
   return (
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`} // ✅ fontes no <html>
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="antialiased bg-zinc-50 text-zinc-900">
+      <body className="antialiased bg-gray-50 text-gray-900">
         <ToastProvider>
-          <div className="min-h-screen w-full flex">
-            {/* ✅ Garanta que <Menu /> tenha w-60 para casar com ml-60 abaixo */}
-            {showMenu && <Menu />}
+          <div className="min-h-screen w-full flex flex-col lg:flex-row">
 
-            {/* Se a largura do Menu mudar, ajuste este ml-60 para a mesma largura */}
-            <main className={showMenu ? "ml-60 p-6 flex-1" : "flex-1"}>
-              {children}
+            {/* Sidebar Desktop */}
+            {userLogged && (
+              <aside className="hidden lg:block fixed left-0 top-0 h-screen w-64 z-40">
+                <Menu />
+              </aside>
+            )}
+
+            {/* Sidebar Mobile */}
+            {userLogged && (
+              <div className="lg:hidden">
+                <Menu />
+              </div>
+            )}
+
+            {/* Main content */}
+            <main
+              className={`flex-1 w-full transition-all ${
+                userLogged ? "lg:ml-64" : ""
+              }`}
+            >
+              <div className="pt-16 lg:pt-0 min-h-screen">
+                <div className="px-4 sm:px-6 lg:px-8 py-6">
+                  {children}
+                </div>
+              </div>
             </main>
           </div>
         </ToastProvider>

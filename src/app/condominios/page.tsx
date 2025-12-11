@@ -15,7 +15,14 @@ import ConfirmDialog from "@/components/confirmDialog";
 import EditCondominioModal from "@/components/editCondominioModal";
 import CreateCondominioModal from "@/components/createCondominioModal";
 import { useToast } from "@/components/toastNotification";
-import { Plus } from "lucide-react";
+import { Plus, Filter } from "lucide-react";
+
+import PageHeader from "@/components/ui/PageHeader";
+import Button from "@/components/ui/Button";
+import { Table, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/Table";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import EmptyState from "@/components/ui/EmptyState";
+import Badge from "@/components/ui/Badge";
 
 export default function ListaCondominios() {
   const [condominio, setCondominios] = useState<ICondominio[]>([]);
@@ -38,11 +45,17 @@ export default function ListaCondominios() {
   const fetchCondominios = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getCondominios();
       setCondominios(data);
       setFiltered(data);
     } catch (err: any) {
-      setError(err.message || "Erro ao carregar dados.");
+      const errorMsg = err.message || "Erro ao carregar dados.";
+      setError(errorMsg);
+      showToast({
+        type: "error",
+        message: errorMsg,
+      });
     } finally {
       setLoading(false);
     }
@@ -127,100 +140,119 @@ export default function ListaCondominios() {
   }
 
   return (
-    <div className="p-6 max-w-full">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold">Condomínios</h1>
-
-        <button
-          type="button"
-          onClick={() => setCreateOpen(true)}
-          className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-        >
-          <Plus size={16} />
-          Criar
-        </button>
-      </div>
-
-      <SearchBox
-        condominios={condominio}
-        search={search}
-        setSearch={setSearch}
-        setFiltered={setFiltered}
-        placeholder="Pesquisar..."
+    <div>
+      <PageHeader
+        title="Condomínios"
+        description="Gerencie todos os condomínios registrados no sistema"
+        action={
+          <Button
+            onClick={() => setCreateOpen(true)}
+            icon={<Plus className="w-5 h-5" />}
+            className="whitespace-nowrap"
+          >
+            Novo Condomínio
+          </Button>
+        }
       />
 
-      <div className="bg-white rounded-md border border-gray-200 overflow-visible">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 pt-3 whitespace-nowrap text-sm text-gray-500 w-12">#</th>
-              <th className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Nome</th>
-              <th className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Endereço</th>
-              <th className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Cidade</th>
-              <th className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">UF</th>
-              <th className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">Tipo</th>
-              <th className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-right">
-                Ação
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {loading ? (
-              <tr>
-                <td className="px-4 py-3 text-center text-gray-500" colSpan={7}>
-                  Carregando Condomínios...
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td className="px-4 py-3 text-center text-red-500" colSpan={7}>
-                  Erro: {error}
-                </td>
-              </tr>
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td className="px-4 py-3 text-sm text-gray-700" colSpan={7}>
-                  Nenhum condomínio encontrado.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((item, index) => (
-                <tr key={item.id_condominio} className="hover:bg-gray-50">
-                  <td className="px-4 pt-3 whitespace-nowrap text-sm text-gray-500">
-                    {String(index + 1)}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {item.nome_condominio}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {item.endereco_condominio}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {item.cidade_condominio}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {item.uf_condominio}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
-                    {item.tipo_condominio}
-                  </td>
-
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 text-right">
-                    <Dropdown
-                      onEdit={() => handleEdit(item)}
-                      onDelete={() => handleAskDelete(item)}
-                      align="right"
-                      labels={{ edit: "Editar", remove: "Excluir" }}
-                    />
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      {/* Filters and Search */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex-1">
+          <SearchBox
+            condominios={condominio}
+            search={search}
+            setSearch={setSearch}
+            setFiltered={setFiltered}
+            placeholder="Pesquisar por nome, endereço ou cidade..."
+          />
+        </div>
+        <Button variant="secondary" icon={<Filter className="w-5 h-5" />}>
+          Filtrar
+        </Button>
       </div>
 
+      {/* Loading State */}
+      {loading ? (
+        <LoadingSpinner message="Carregando condomínios..." />
+      ) : error ? (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-6 py-4 mb-6">
+          <p className="text-red-600 text-sm">{error}</p>
+          <button
+            onClick={fetchCondominios}
+            className="mt-2 text-red-700 font-medium hover:text-red-800 transition-colors"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      ) : null}
+
+      {/* Empty State */}
+      {!loading && !error && filtered.length === 0 ? (
+        <EmptyState
+          title={search ? "Nenhum condomínio encontrado" : "Nenhum condomínio cadastrado"}
+          description={
+            search
+              ? "Tente ajustar sua busca"
+              : "Comece criando um novo condomínio"
+          }
+          action={
+            !search && (
+              <Button onClick={() => setCreateOpen(true)}>
+                Criar Primeiro Condomínio
+              </Button>
+            )
+          }
+        />
+      ) : (
+        /* Table */
+        <Table>
+          <TableHead>
+            <TableRow isHoverable={false}>
+              <TableCell isHeader>#</TableCell>
+              <TableCell isHeader>Nome</TableCell>
+              <TableCell isHeader>Endereço</TableCell>
+              <TableCell isHeader>Cidade</TableCell>
+              <TableCell isHeader>UF</TableCell>
+              <TableCell isHeader>Tipo</TableCell>
+              <TableCell isHeader align="right">Ações</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filtered.map((item, index) => (
+              <TableRow key={item.id_condominio}>
+                <TableCell className="text-gray-500 font-medium w-12">
+                  {String(index + 1)}
+                </TableCell>
+                <TableCell className="font-medium text-gray-900">
+                  {item.nome_condominio}
+                </TableCell>
+                <TableCell>{item.endereco_condominio}</TableCell>
+                <TableCell>{item.cidade_condominio}</TableCell>
+                <TableCell>
+                  <Badge variant="info">
+                    {item.uf_condominio}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="default">
+                    {item.tipo_condominio}
+                  </Badge>
+                </TableCell>
+                <TableCell align="right">
+                  <Dropdown
+                    onEdit={() => handleEdit(item)}
+                    onDelete={() => handleAskDelete(item)}
+                    align="right"
+                    labels={{ edit: "Editar", remove: "Excluir" }}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      {/* Modals */}
       <EditCondominioModal
         open={editOpen}
         data={editItem}
@@ -245,10 +277,10 @@ export default function ListaCondominios() {
             <>
               <p>
                 Tem certeza de que deseja excluir o condomínio{" "}
-                <b className="text-sky-700">{selected.nome_condominio}</b>?
+                <b className="text-blue-600">{selected.nome_condominio}</b>?
               </p>
-              <p className="text-red-600 mt-1">
-                Todos os moradores vinculados a este condomínio também serão
+              <p className="text-red-600 mt-3 text-sm font-medium">
+                ⚠️ Todos os moradores vinculados a este condomínio também serão
                 excluídos. Esta ação não poderá ser desfeita.
               </p>
             </>
@@ -256,6 +288,7 @@ export default function ListaCondominios() {
         }
         confirmLabel={isDeleting ? "Excluindo..." : "Excluir"}
         cancelLabel="Cancelar"
+        confirmDisabled={isDeleting}
         onCancel={() => {
           setConfirmOpen(false);
           setSelected(null);

@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export async function GET() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("condominio")
@@ -27,7 +27,7 @@ export async function GET() {
 
 export async function DELETE(req: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const body = await req.json().catch(() => ({}));
     const { id } = body ?? {};
 
@@ -111,7 +111,7 @@ export async function PUT(req: Request) {
         { status: 400 }
       );
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("condominio")

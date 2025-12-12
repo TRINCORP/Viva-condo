@@ -1,41 +1,41 @@
-/*# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# ======================================
+# NEXT.JS BUILD
+# ======================================
+.next/
+out/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# ======================================
+# DEPENDENCIAS
+# ======================================
+node_modules/
 
-# testing
-/coverage
+# ======================================
+# AMBIENTES (NÃO SUBIR EM PRODUÇÃO!)
+# Para testes, vamos liberar .env.local manualmente
+# ======================================
+.env
+.env.*.local
+.env.development
+.env.production
 
-# next.js
-/.next/
-/out/
+# EXCEÇÃO PARA TESTES:
+!/.env.local
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# ======================================
+# LOGS E CACHES
+# ======================================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
+dist/
+.cache/
+coverage/
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ======================================
+# IDEs E SISTEMAS
+# ======================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

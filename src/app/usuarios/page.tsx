@@ -7,18 +7,29 @@ import { createClient } from "@/utils/supabase/server";
 type Usuario = {
   id_usuario: string;
   nome_usuario: string;
-  tipo_usuario: string | null;
+  email_usuario: string | null;
+  empresa_usuario: string | null;
+  role_usuario: string | null;
+  id_administradora: number | null;
   id_condominio: number | null;
 };
 
 export default async function ListaUsuarios() {
-  const supabase = await createClient(); // ← ESSENCIAL
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("usuarios")
-    .select("id_usuario, nome_usuario, tipo_usuario, id_condominio");
+    .select(`
+      id_usuario,
+      nome_usuario,
+      email_usuario,
+      empresa_usuario,
+      role_usuario,
+      id_administradora,
+      id_condominio
+    `);
 
-  if (error) console.error(error);
+  if (error) console.error("Erro ao buscar usuários:", error);
 
   const usuarios: Usuario[] = (data ?? []) as Usuario[];
 
@@ -26,7 +37,7 @@ export default async function ListaUsuarios() {
     <div>
       <PageHeader
         title="Usuários"
-        description="Gerencie todos os usuários do sistema"
+        description="Gerencie todos os usuários da administradora e dos condomínios"
         action={
           <Button icon={<Plus className="w-5 h-5" />}>Novo Usuário</Button>
         }
@@ -50,12 +61,27 @@ export default async function ListaUsuarios() {
               key={user.id_usuario}
               className="border p-4 rounded-lg shadow-sm bg-white"
             >
-              <h3 className="font-semibold">{user.nome_usuario}</h3>
+              <h3 className="font-semibold text-lg">{user.nome_usuario}</h3>
+
               <p className="text-gray-600 text-sm">
-                Tipo: {user.tipo_usuario || "não definido"}
+                <strong>Email:</strong> {user.email_usuario || "-"}
               </p>
+
               <p className="text-gray-600 text-sm">
-                Condomínio: {user.id_condominio || "-"}
+                <strong>Empresa:</strong> {user.empresa_usuario || "-"}
+              </p>
+
+              <p className="text-gray-600 text-sm">
+                <strong>Função:</strong> {user.role_usuario || "não definido"}
+              </p>
+
+              <p className="text-gray-600 text-sm">
+                <strong>Administradora:</strong>{" "}
+                {user.id_administradora || "-"}
+              </p>
+
+              <p className="text-gray-600 text-sm">
+                <strong>Condomínio:</strong> {user.id_condominio || "-"}
               </p>
             </div>
           ))}

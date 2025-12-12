@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Building2, Users, Home } from "lucide-react";
 
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
@@ -115,25 +116,41 @@ export default function Dashboard() {
             </h2>
           </CardHeader>
 
-          <CardBody className="space-y-3 text-sm text-gray-600 leading-relaxed">
-            <p>
-              O <strong>Viva-Condo</strong> é uma plataforma de gestão condominial
-              desenvolvida para centralizar o controle de condomínios, usuários
-              administrativos e moradores em um único ambiente seguro e
-              organizado.
-            </p>
+          <CardBody>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+              {/* Texto */}
+              <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
+                <p>
+                  O <strong>Viva-Condo</strong> é uma plataforma de gestão
+                  condominial desenvolvida para centralizar o controle de
+                  condomínios, usuários administrativos e moradores em um único
+                  ambiente seguro e organizado.
+                </p>
 
-            <p>
-              A solução permite o cadastro e gerenciamento de condomínios,
-              controle de acessos por perfil de usuário e a vinculação direta de
-              moradores às suas respectivas unidades e blocos.
-            </p>
+                <p>
+                  A solução permite o cadastro e gerenciamento de condomínios,
+                  controle de acessos por perfil de usuário e a vinculação direta
+                  de moradores às suas respectivas unidades e blocos.
+                </p>
 
-            <p>
-              O objetivo é oferecer uma base sólida para evoluções futuras,
-              como módulos de comunicação, chamados, financeiro e relatórios
-              gerenciais.
-            </p>
+                <p>
+                  O objetivo é oferecer uma base sólida para evoluções futuras,
+                  como módulos de comunicação, chamados, financeiro e relatórios
+                  gerenciais.
+                </p>
+              </div>
+
+              {/* Imagem */}
+              <div className="flex justify-center items-center">
+                <img
+                  src="/modelo-viva-condo.png"
+                  alt="Modelo Viva-Condo"
+                  className="w-[380px] max-w-full rounded-xl shadow-md"
+                />
+
+
+              </div>
+            </div>
           </CardBody>
         </Card>
 

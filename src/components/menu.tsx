@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Building2, Users, BarChart3, Menu as MenuIcon, X } from "lucide-react";
+import {
+  LogOut,
+  Building2,
+  Users,
+  BarChart3,
+  Home,
+  Menu as MenuIcon,
+  X
+} from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 import Button from "./ui/Button";
@@ -18,6 +26,7 @@ export default function Menu() {
     { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
     { href: "/condominios", label: "Condomínios", icon: Building2 },
     { href: "/usuarios", label: "Usuários", icon: Users },
+    { href: "/moradores", label: "Moradores", icon: Home },
   ];
 
   const isActive = (href: string) => pathname?.startsWith(href);
@@ -51,6 +60,7 @@ export default function Menu() {
           {nav.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+
             return (
               <li key={item.href}>
                 <Link
@@ -107,15 +117,12 @@ export default function Menu() {
           </div>
           <span className="font-bold text-gray-900">VivaCondo</span>
         </Link>
+
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          {mobileOpen ? (
-            <X className="w-6 h-6" />
-          ) : (
-            <MenuIcon className="w-6 h-6" />
-          )}
+          {mobileOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
         </button>
       </div>
 

@@ -15,7 +15,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Verifica sessão (se já está logado, vai pro dashboard)
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -28,128 +27,115 @@ export default function LoginPage() {
     checkSession();
   }, [router, supabase]);
 
-  // Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setErrorMsg(null);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        const msg = error.message.toLowerCase();
-        if (msg.includes("invalid")) setErrorMsg("E-mail ou senha inválidos");
-        else setErrorMsg("Erro inesperado. Tente novamente.");
-        return;
-      }
-
-      router.replace("/dashboard");
-      router.refresh();
-    } catch {
-      setErrorMsg("Erro inesperado. Tente novamente.");
-    } finally {
+    if (error) {
+      setErrorMsg("E-mail ou senha inválidos.");
       setSubmitting(false);
+      return;
     }
+
+    router.replace("/dashboard");
+    router.refresh();
   };
 
   if (checkingSession) return null;
 
   return (
-    <div className="relative min-h-screen flex bg-gradient-to-br from-red-600 via-red-500 to-red-700">
+    <div className="h-screen w-screen overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
-      {/* Partículas decorativas */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-25">
-        <div className="animate-pulse w-64 h-64 bg-white rounded-full blur-3xl absolute top-10 left-10" />
-        <div className="animate-pulse w-72 h-72 bg-white rounded-full blur-3xl absolute bottom-20 right-20" />
-      </div>
+      {/* LADO ESQUERDO – Imagem Premium */}
+      <div className="hidden lg:block relative h-full">
+        <Image
+          src="/fundo_login.png"
+          alt="Condomínio Premium"
+          fill
+          className="object-cover brightness-75"
+          priority
+        />
 
-      {/* Esquerda com banner */}
-      <div className="hidden lg:flex flex-col justify-center items-center w-1/2 relative">
-        <div className="absolute inset-0 rounded-r-[50px] overflow-hidden shadow-2xl">
-          <Image
-            src="/Banner.png"
-            alt="Banner VivaCondo"
-            fill
-            className="object-cover opacity-90"
-          />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60" />
+
+        <div className="absolute bottom-10 left-10 text-white select-none">
+          <h1 className="text-4xl font-bold drop-shadow-lg">VivaCondo</h1>
+          <p className="text-lg opacity-90 mt-2">
+            Gestão inteligente e moderna para administradoras e condomínios.
+          </p>
         </div>
       </div>
 
-      {/* Direita com card */}
-      <div className="flex items-center justify-center w-full lg:w-1/2 p-10 relative">
+      {/* LADO DIREITO – SEM SCROLL */}
+      <div className="flex justify-center items-center h-full">
 
-        <div className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl rounded-3xl p-10 w-full max-w-md text-white">
+        <div className="bg-white shadow-2xl rounded-3xl p-8 w-full max-w-md">
 
-          {/* Logo */}
-          <div className="text-center mb-8">
+          {/* LOGO */}
+          <div className="text-center mb-6">
             <Image
               src="/Logo_viva_condo.png"
-              width={200}
-              height={70}
               alt="Logo VivaCondo"
-              className="mx-auto drop-shadow-lg"
+              width={180}
+              height={60}
+              className="mx-auto"
             />
           </div>
 
-          {/* Modelo + título */}
-          <div className="flex items-center gap-4 justify-center mb-8">
-            <Image
-              src="/Modelo_viva_condo.png"
-              width={70}
-              height={70}
-              alt="Modelo"
-              className="rounded-full shadow-xl border-2 border-white"
-            />
+          <h2 className="text-3xl font-semibold text-gray-800 text-center mb-6">
+            Bem-vindo de volta
+          </h2>
 
-            <h1 className="text-4xl font-bold drop-shadow-lg">
-              Bem-vindo
-            </h1>
-          </div>
-
-          {/* Formulário */}
           <form onSubmit={handleLogin} className="space-y-5">
 
-            <input
-              type="email"
-              placeholder="E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 rounded-xl text-black focus:ring-4 focus:ring-red-300 outline-none"
-              required
-            />
+            <div>
+              <label className="text-gray-700 text-sm font-medium">E-mail</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full mt-1 p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+                required
+              />
+            </div>
 
-            <input
-              type="password"
-              placeholder="Senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 rounded-xl text-black focus:ring-4 focus:ring-red-300 outline-none"
-              required
-            />
+            <div>
+              <label className="text-gray-700 text-sm font-medium">Senha</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full mt-1 p-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none"
+                required
+              />
+            </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 rounded-xl bg-white text-red-600 font-bold text-lg shadow-lg hover:bg-gray-100 transition disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold text-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
               {submitting ? "Entrando..." : "Entrar"}
             </button>
 
             {errorMsg && (
-              <p className="text-center text-yellow-300 text-sm font-semibold">
+              <p className="text-center text-red-600 text-sm mt-3 font-medium">
                 {errorMsg}
               </p>
             )}
           </form>
 
-          <p className="text-center text-white/80 mt-6 text-sm">
-            © {new Date().getFullYear()} VivaCondo — Gestão inteligente para condomínios.
+          <p className="text-center text-gray-500 mt-6 text-sm select-none">
+            © {new Date().getFullYear()} VivaCondo — Todos os direitos reservados.
           </p>
         </div>
+
       </div>
     </div>
   );

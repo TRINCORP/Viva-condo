@@ -9,7 +9,6 @@ type Usuario = {
   empresa_usuario?: string | null;
   role_usuario?: string | null;
   id_administradora?: number | null;
-  id_condominio?: number | null;
   created_at?: string | null;
 };
 
@@ -25,12 +24,13 @@ export default async function ListaUsuarios() {
       empresa_usuario,
       role_usuario,
       id_administradora,
-      id_condominio,
       created_at
     `)
     .order("created_at", { ascending: true });
 
-  if (error) console.error("Erro ao buscar usuários:", error);
+  if (error) {
+    console.error("Erro ao buscar usuários:", error);
+  }
 
   const usuarios: Usuario[] = (data ?? []) as Usuario[];
 
@@ -38,7 +38,7 @@ export default async function ListaUsuarios() {
     <div>
       <PageHeader
         title="Usuários"
-        description="Gerencie todos os usuários da administradora e dos condomínios"
+        description="Gerencie todos os usuários da administradora"
         action={null}
       />
 

@@ -7,7 +7,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("usuarios")
-      .select("id_usuario, nome_usuario, email_usuario, empresa_usuario, role_usuario, id_administradora, id_condominio, created_at")
+      .select("id_usuario, nome_usuario, email_usuario, empresa_usuario, role_usuario, id_administradora, created_at")
       .order("created_at", { ascending: true });
 
     if (error)
@@ -19,35 +19,7 @@ export async function GET() {
   }
 }
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json().catch(() => ({}));
-    const { nome_usuario, email_usuario, empresa_usuario, role_usuario, id_administradora, id_condominio } = body ?? {};
-
-    if (!nome_usuario || typeof nome_usuario !== "string")
-      return NextResponse.json({ success: false, error: "Campo 'nome_usuario' é obrigatório." }, { status: 400 });
-
-    const supabase = await createClient();
-
-    const payload: any = { nome_usuario };
-    if (email_usuario !== undefined) payload.email_usuario = email_usuario;
-    if (empresa_usuario !== undefined) payload.empresa_usuario = empresa_usuario;
-    if (role_usuario !== undefined) payload.role_usuario = role_usuario;
-    if (id_administradora !== undefined) payload.id_administradora = id_administradora;
-    if (id_condominio !== undefined) payload.id_condominio = id_condominio;
-
-    const { data, error } = await supabase
-      .from("usuarios")
-      .insert(payload)
-      .select("id_usuario");
-
-    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-
-    return NextResponse.json({ success: true, data: data ?? [] }, { status: 201 });
-  } catch (e: any) {
-    return NextResponse.json({ success: false, error: e?.message ?? "Erro ao criar usuário." }, { status: 500 });
-  }
-}
+export async function POST(req: Request) {}
 
 export async function PUT(req: Request) {
   try {
@@ -55,7 +27,7 @@ export async function PUT(req: Request) {
     if (!id) return NextResponse.json({ success: false, error: "Campo 'id' é obrigatório." }, { status: 400 });
     if (!updates || typeof updates !== "object") return NextResponse.json({ success: false, error: "Campo 'updates' inválido." }, { status: 400 });
 
-    const allowed = ["nome_usuario", "email_usuario", "empresa_usuario", "role_usuario", "id_administradora", "id_condominio"] as const;
+    const allowed = ["nome_usuario", "email_usuario", "empresa_usuario", "role_usuario", "id_administradora"] as const;
     const safeUpdates: Record<string, any> = {};
     for (const k of allowed) if (k in updates) safeUpdates[k] = updates[k];
 

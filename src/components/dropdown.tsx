@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { createPortal } from "react-dom";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 
 type Props = {
@@ -24,8 +25,11 @@ export default function Dropdown({
   ...rest
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [dropUp, setDropUp] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties | null>(null);
 
   // fechar com clique fora e ESC
   useEffect(() => {
@@ -46,6 +50,65 @@ export default function Dropdown({
     };
   }, [open]);
 
+  // When opening, detect available space and decide whether to render menu above
+  useEffect(() => {
+    if (!open || !btnRef.current) return;
+    const btn = btnRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - btn.bottom;
+    const spaceAbove = btn.top;
+    // approximate menu height; if there's more space above than below, open upwards
+    const approxMenuHeight = 140;
+    setDropUp(spaceBelow < approxMenuHeight && spaceAbove > spaceBelow);
+    setAnchorRect(btn);
+  }, [open]);
+
+  // Recompute anchor rect on scroll/resize while open so the floating menu stays aligned
+  useEffect(() => {
+    if (!open) return;
+    function handlePosChange() {
+      if (!btnRef.current) return;
+      setAnchorRect(btnRef.current.getBoundingClientRect());
+    }
+    window.addEventListener("resize", handlePosChange);
+    // use capture so scrolls on containers bubble
+    window.addEventListener("scroll", handlePosChange, true);
+    return () => {
+      window.removeEventListener("resize", handlePosChange);
+      window.removeEventListener("scroll", handlePosChange, true);
+    };
+  }, [open]);
+
+  // After menu mounts, measure and position it in the viewport using fixed positioning
+  useLayoutEffect(() => {
+    if (!open || !anchorRect || !menuRef.current) return;
+    const menu = menuRef.current;
+    const menuW = menu.offsetWidth;
+    const menuH = menu.offsetHeight;
+
+    let left = anchorRect.left;
+    if (align === "right") {
+      left = anchorRect.right - menuW;
+    }
+
+    // clamp horizontally to viewport with 8px padding
+    const minLeft = 8;
+    const maxLeft = window.innerWidth - menuW - 8;
+    left = Math.min(Math.max(left, minLeft), Math.max(minLeft, maxLeft));
+
+    let style: React.CSSProperties = { position: "fixed", left: Math.round(left), zIndex: 9999 };
+
+    if (dropUp) {
+      // position above the button
+      style.top = undefined;
+      style.bottom = Math.round(window.innerHeight - anchorRect.top + 8);
+    } else {
+      style.top = Math.round(anchorRect.bottom + 8);
+      style.bottom = undefined;
+    }
+
+    setMenuStyle(style);
+  }, [open, anchorRect, align, dropUp]);
+
   return (
     <div className="relative inline-block text-left" {...rest}>
       <button
@@ -61,13 +124,13 @@ export default function Dropdown({
         <span className="sr-only">Abrir ações</span>
       </button>
 
-      {open && (
+      {open && anchorRect && createPortal(
         <div
           ref={menuRef}
           role="menu"
           tabIndex={-1}
-          className={`absolute z-20 mt-2 min-w-40 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none
-            ${align === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left"}`}
+          style={menuStyle ?? { position: "fixed", left: 0, top: 0 }}
+          className={`min-w-40 rounded-xl border border-gray-200 bg-white shadow-lg focus:outline-none`}
         >
           <button
             role="menuitem"
@@ -92,7 +155,8 @@ export default function Dropdown({
             <Trash2 className="h-4 w-4 text-red-600" />
             <span className="text-red-600">{labels?.remove ?? "Excluir"}</span>
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

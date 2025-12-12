@@ -1,13 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
-import Button from "@/components/ui/Button";
+import { /* Plus */ } from "lucide-react";
 import SearchBox from "./search";
 import { Table, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/Table";
 import Badge from "@/components/ui/Badge";
 import Dropdown from "@/components/dropdown";
-import CreateUsuarioModal from "./createUsuarioModal";
 import EditUsuarioModal from "./editUsuarioModal";
 import ConfirmDialog from "./confirmDialog";
 import { useToast } from "./toastNotification";
@@ -29,7 +27,6 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: Usuario
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editItem, setEditItem] = useState<Usuario | null>(null);
 
@@ -68,7 +65,6 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: Usuario
       const json = await res.json();
       if (!json?.success) throw new Error(json?.error || "Falha ao criar usuário");
       showToast({ type: "success", message: "Usuário criado" });
-      setCreateOpen(false);
       await refetch();
     } catch (e: any) {
       showToast({ type: "error", message: e?.message ?? "Erro" });
@@ -127,12 +123,6 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: Usuario
             placeholder="Pesquisar por nome, email ou empresa..."
           />
         </div>
-
-        <div className="flex items-center gap-3">
-          <Button onClick={() => setCreateOpen(true)} icon={<Plus className="w-5 h-5" />}>
-            Novo Usuário
-          </Button>
-        </div>
       </div>
 
       <div className="mt-0">
@@ -172,9 +162,6 @@ export default function UsuariosClient({ initialUsers }: { initialUsers: Usuario
           </TableBody>
         </Table>
       </div>
-
-      <CreateUsuarioModal open={createOpen} onClose={() => setCreateOpen(false)} onSave={handleCreate} />
-
       <EditUsuarioModal
         open={editOpen}
         data={editItem}

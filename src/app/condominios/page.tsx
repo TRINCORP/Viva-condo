@@ -15,7 +15,7 @@ import ConfirmDialog from "@/components/confirmDialog";
 import EditCondominioModal from "@/components/editCondominioModal";
 import CreateCondominioModal from "@/components/createCondominioModal";
 import { useToast } from "@/components/toastNotification";
-import { Plus, Filter } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
@@ -166,9 +166,6 @@ export default function ListaCondominios() {
             placeholder="Pesquisar por nome, endereço ou cidade..."
           />
         </div>
-        <Button variant="secondary" icon={<Filter className="w-5 h-5" />}>
-          Filtrar
-        </Button>
       </div>
 
       {/* Loading State */}

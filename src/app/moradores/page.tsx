@@ -14,7 +14,7 @@ import ConfirmDialog from "@/components/confirmDialog";
 import EditMoradorModal from "@/components/editMoradorModal";
 import CreateMoradorModal from "@/components/createMoradorModal";
 import { useToast } from "@/components/toastNotification";
-import { Plus, Filter } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import PageHeader from "@/components/ui/PageHeader";
 import Button from "@/components/ui/Button";
@@ -71,7 +71,18 @@ export default function ListaMoradores() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getMoradores();
+      const raw = await getMoradores();
+
+      // Normalize `condominio`: API may return an array of condominio entries;
+      // pick the first one (or fallback to a minimal object) so the local
+      // `IMorador` shape (expects a single object) is satisfied.
+      const data = (raw as any[]).map((m) => ({
+        ...m,
+        condominio: Array.isArray(m?.condominio)
+          ? (m.condominio[0] ?? { id_condominio: 0, nome_condominio: "" })
+          : (m.condominio ?? { id_condominio: 0, nome_condominio: "" }),
+      })) as IMorador[];
+
       setMoradores(data);
       setFiltered(data);
     } catch (err: any) {
@@ -197,9 +208,6 @@ export default function ListaMoradores() {
             placeholder="Pesquisar por nome, condomínio, bloco ou unidade..."
           />
         </div>
-        <Button variant="secondary" icon={<Filter className="w-5 h-5" />}>
-          Filtrar
-        </Button>
       </div>
 
       {loading ? (

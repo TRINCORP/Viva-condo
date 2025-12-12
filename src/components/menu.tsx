@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   LogOut,
   Building2,
   Users,
   BarChart3,
   Home,
+  HelpCircle,
   Menu as MenuIcon,
-  X
+  X,
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
@@ -44,17 +46,27 @@ export default function Menu() {
 
   const SidebarContent = () => (
     <>
-      {/* Logo Section */}
+      {/* Logo */}
       <div className="px-6 py-6 border-b border-gray-200">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-white" />
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div className="w-14 h-14 flex items-center justify-center">
+            <Image
+              src="/logo_viva_condo.png"
+              alt="VivaCondo"
+              width={56}
+              height={56}
+              priority
+              className="object-contain"
+            />
           </div>
-          <span className="text-lg font-bold text-gray-900">VivaCondo</span>
+
+          <span className="text-lg font-bold text-gray-900">
+            VivaCondo
+          </span>
         </Link>
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation */}
       <nav className="px-3 py-6 flex-1">
         <ul className="space-y-2">
           {nav.map((item) => {
@@ -85,7 +97,26 @@ export default function Menu() {
         </ul>
       </nav>
 
-      {/* Logout Section */}
+      {/* FAQ */}
+      <div className="px-3 pb-2">
+        <Link
+          href="/faq"
+          className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-all
+            ${
+              isActive("/faq")
+                ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600 pl-3"
+                : "text-gray-700 hover:bg-gray-100"
+            }
+          `}
+          onClick={() => setMobileOpen(false)}
+        >
+          <HelpCircle className="w-5 h-5" />
+          <span>FAQ</span>
+        </Link>
+      </div>
+
+      {/* Logout */}
       <div className="px-3 py-6 border-t border-gray-200">
         <Button
           onClick={handleLogout}
@@ -112,9 +143,13 @@ export default function Menu() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 z-50">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-white" />
-          </div>
+          <Image
+            src="/logo_viva_condo.png"
+            alt="VivaCondo"
+            width={40}
+            height={40}
+            className="object-contain"
+          />
           <span className="font-bold text-gray-900">VivaCondo</span>
         </Link>
 
@@ -122,7 +157,11 @@ export default function Menu() {
           onClick={() => setMobileOpen(!mobileOpen)}
           className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
-          {mobileOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
+          {mobileOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <MenuIcon className="w-6 h-6" />
+          )}
         </button>
       </div>
 
@@ -133,7 +172,7 @@ export default function Menu() {
         </div>
       )}
 
-      {/* Mobile Backdrop */}
+      {/* Backdrop */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 top-16 bg-black/50 z-30"

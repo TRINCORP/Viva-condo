@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Building2, Users, Home } from "lucide-react";
 
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
@@ -9,6 +10,7 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 import { getCondominios } from "@/services/condominio.service";
 import { getUsuarios } from "@/services/usuario.service";
+import { getMoradores } from "@/services/morador.service";
 
 interface StatCard {
   title: string;
@@ -19,6 +21,7 @@ interface StatCard {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StatCard[]>([]);
 
@@ -27,9 +30,9 @@ export default function Dashboard() {
       try {
         setLoading(true);
 
-        // Busca dados do Supabase via services
         const condominios = await getCondominios();
         const usuarios = await getUsuarios();
+        const moradores = await getMoradores();
 
         setStats([
           {
@@ -44,14 +47,14 @@ export default function Dashboard() {
             value: usuarios.length,
             icon: <Users className="w-6 h-6" />,
             color: "bg-purple-50 text-purple-600 border-purple-200",
-            description: "Gerenciadores cadastrados",
+            description: "Usuários com acesso ao sistema",
           },
           {
-            title: "Unidades Totais",
-            value: "---",
+            title: "Moradores Totais",
+            value: moradores.length,
             icon: <Home className="w-6 h-6" />,
             color: "bg-orange-50 text-orange-600 border-orange-200",
-            description: "Unidades nos condomínios",
+            description: "Moradores cadastrados",
           },
         ]);
       } catch (error) {
@@ -72,7 +75,7 @@ export default function Dashboard() {
     <div>
       <PageHeader
         title="Dashboard"
-        description="Visão geral do sistema de gestão condominial"
+        description="Visão geral do sistema Viva-Condo"
       />
 
       {/* STAT CARDS */}
@@ -104,33 +107,33 @@ export default function Dashboard() {
 
       {/* CONTENT SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
+        {/* About Viva-Condo */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <h2 className="text-lg font-semibold text-gray-900">
-              Atividade Recente
+              Sobre o Viva-Condo
             </h2>
           </CardHeader>
 
-          <CardBody>
-            <div className="space-y-4">
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-0"
-                >
-                  <div className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      Condomínio atualizado
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Há alguns minutos
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <CardBody className="space-y-3 text-sm text-gray-600 leading-relaxed">
+            <p>
+              O <strong>Viva-Condo</strong> é uma plataforma de gestão condominial
+              desenvolvida para centralizar o controle de condomínios, usuários
+              administrativos e moradores em um único ambiente seguro e
+              organizado.
+            </p>
+
+            <p>
+              A solução permite o cadastro e gerenciamento de condomínios,
+              controle de acessos por perfil de usuário e a vinculação direta de
+              moradores às suas respectivas unidades e blocos.
+            </p>
+
+            <p>
+              O objetivo é oferecer uma base sólida para evoluções futuras,
+              como módulos de comunicação, chamados, financeiro e relatórios
+              gerenciais.
+            </p>
           </CardBody>
         </Card>
 
@@ -142,16 +145,25 @@ export default function Dashboard() {
             </h2>
           </CardHeader>
           <CardBody className="space-y-3">
-            <button className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-              + Novo Condomínio
+            <button
+              onClick={() => router.push("/condominios")}
+              className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              Ir para Condomínios
             </button>
 
-            <button className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-              + Novo Usuário
+            <button
+              onClick={() => router.push("/usuarios")}
+              className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              Ir para Usuários
             </button>
 
-            <button className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-              Ver Relatórios
+            <button
+              onClick={() => router.push("/moradores")}
+              className="w-full px-4 py-2 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              Ir para Moradores
             </button>
           </CardBody>
         </Card>
